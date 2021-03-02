@@ -44,11 +44,15 @@ function init(){
 function drawLoop(){
 	frame++;
 	clear();
+	
+	if(sickCount < PEOPLE_COUNT){
+		movePeople();
+		infect();
+		updateStats();
+	}
+
 	drawBackground();
-	movePeople();
-	infect();
 	drawPeople();
-	updateStats();
 }
 
 function generatePeople(){
@@ -104,20 +108,20 @@ function drawPeople(){
 
 function infect(){
 	people.forEach((person) => {
-		if(!person.recovered && person.sick){
+		if(person.sick){
 			//check for collisions
 			people.forEach((otherPerson) => {
-				if(otherPerson.id !== person.id && !otherPerson.sick && !otherPerson.recovered && distanceBetween(person.x, person.y, otherPerson.x, otherPerson.y) < PERSON_SIZE/2){
+				if(person.sick && !person.recovered && otherPerson.id !== person.id && !otherPerson.sick && !otherPerson.recovered && colliding(person, otherPerson)){					
 					otherPerson.sick = true;
 					otherPerson.infectionDate = day;
 					sickCount++;
 				}
 			})
 
-			if(day - person.infectionDate > 10){
-				person.recovered = true;
-				recoveredCount++;
-			}
+			// if(day - person.infectionDate > 10){
+			// 	person.recovered = true;
+			// 	recoveredCount++;
+			// }
 		}
 	})
 }
@@ -135,8 +139,13 @@ function distanceBetween(x1, y1, x2, y2){
 	return Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
 }
 
+function colliding(objectOne, objectTwo){
+	return distanceBetween(objectOne.x, objectOne.y, objectTwo.x, objectTwo.y) < PERSON_SIZE
+}
+
 function updateStats(){
 	document.getElementById("frame").innerText = frame;
+	document.getElementById("day").innerText = day;
 	document.getElementById("sickCount").innerText = sickCount;
 	document.getElementById("recoveredCount").innerText = recoveredCount;
 
